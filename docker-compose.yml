@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: letracerta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: letracerta
+      POSTGRES_PASSWORD: letracerta
+      POSTGRES_DB: letracerta
+    ports:
+      - '5432:5432'
+    volumes:
+      - letracerta_pgdata:/var/lib/postgresql/data
+
+volumes:
+  letracerta_pgdata:

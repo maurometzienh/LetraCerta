@@ -1,0 +1,33 @@
+{
+  "name": "letracerta-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "db:sync": "tsx src/database/sync-schema.ts",
+    "seed": "tsx src/database/seeders/run.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@mikro-orm/core": "^6.4.3",
+    "@mikro-orm/migrations": "^6.4.3",
+    "@mikro-orm/postgresql": "^6.4.3",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "^6.4.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
