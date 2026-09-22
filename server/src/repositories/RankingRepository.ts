@@ -17,7 +17,7 @@ export class RankingRepository {
               COUNT(*) as games_played
        FROM games g
        JOIN users u ON u.id = g.user_id
-       WHERE g.status IN ('WON', 'LOST')
+       WHERE g.status IN ('WON', 'LOST') AND g.mode = 'DAILY'
        GROUP BY u.id, u.username
        ORDER BY wins DESC, games_played ASC
        LIMIT ?`,

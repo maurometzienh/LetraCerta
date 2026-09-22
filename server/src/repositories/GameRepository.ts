@@ -1,21 +1,45 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { Game, GameStatus } from '../domain/entities/Game.js';
+import { Game, GameMode, GameStatus } from '../domain/entities/Game.js';
 import { User } from '../domain/entities/User.js';
 import { DailyWord } from '../domain/entities/DailyWord.js';
+import { Word } from '../domain/entities/Word.js';
 
 export class GameRepository {
   constructor(private readonly em: EntityManager) {}
+
+  findById(id: number): Promise<Game | null> {
+    return this.em.findOne(Game, { id }, { populate: ['attempts', 'word'] });
+  }
 
   findByUserAndDailyWord(user: User, dailyWord: DailyWord): Promise<Game | null> {
     return this.em.findOne(
       Game,
       { user, dailyWord },
-      { populate: ['attempts'] },
+      { populate: ['attempts', 'word'] },
     );
   }
 
-  create(user: User, dailyWord: DailyWord): Game {
-    const game = this.em.create(Game, { user, dailyWord });
+  findLatestByUserAndMode(user: User, mode: GameMode): Promise<Game | null> {
+    return this.em.findOne(
+      Game,
+      { user, mode },
+      { populate: ['attempts', 'word'], orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  createDaily(user: User, dailyWord: DailyWord): Game {
+    const game = this.em.create(Game, {
+      user,
+      mode: GameMode.DAILY,
+      dailyWord,
+      word: dailyWord.word,
+    });
+    this.em.persist(game);
+    return game;
+  }
+
+  createRandom(user: User, word: Word): Game {
+    const game = this.em.create(Game, { user, mode: GameMode.RANDOM, word });
     this.em.persist(game);
     return game;
   }
@@ -23,7 +47,7 @@ export class GameRepository {
   findFinishedByUser(user: User): Promise<Game[]> {
     return this.em.find(
       Game,
-      { user, status: { $in: [GameStatus.WON, GameStatus.LOST] } },
+      { user, mode: GameMode.DAILY, status: { $in: [GameStatus.WON, GameStatus.LOST] } },
       { orderBy: { createdAt: 'ASC' }, populate: ['attempts'] },
     );
   }

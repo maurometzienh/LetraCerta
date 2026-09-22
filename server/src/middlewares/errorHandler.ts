@@ -20,6 +20,13 @@ export function errorHandler(
     return;
   }
 
+  // Erros conhecidos do próprio Fastify (ex.: body malformado) já trazem um statusCode de cliente (4xx).
+  const fastifyStatusCode = 'statusCode' in error ? error.statusCode : undefined;
+  if (fastifyStatusCode && fastifyStatusCode >= 400 && fastifyStatusCode < 500) {
+    reply.status(fastifyStatusCode).send({ message: error.message });
+    return;
+  }
+
   console.error(error);
   reply.status(500).send({ message: 'Erro interno do servidor.' });
 }

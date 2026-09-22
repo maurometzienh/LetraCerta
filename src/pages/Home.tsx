@@ -3,6 +3,7 @@ import { Board } from '../components/Board';
 import { Keyboard } from '../components/Keyboard';
 import { StatsPanel } from '../components/StatsPanel';
 import { useGame } from '../hooks/useGame';
+import { useRandomGame } from '../hooks/useRandomGame';
 import { WORD_LENGTH } from '../utils/constants';
 
 const STATUS_MESSAGES: Record<string, string> = {
@@ -10,16 +11,24 @@ const STATUS_MESSAGES: Record<string, string> = {
   LOST: 'Não foi dessa vez. A palavra era:',
 };
 
+type Mode = 'daily' | 'random';
+
 function Home() {
-  const { game, isLoading, isSubmitting, error, submitGuess } = useGame();
+  const [mode, setMode] = useState<Mode>('daily');
+  const daily = useGame();
+  const random = useRandomGame();
+
+  const active = mode === 'daily' ? daily : random;
+  const game = active.game;
+  const isFinished = game?.status === 'WON' || game?.status === 'LOST';
+  const canType = Boolean(game) && !isFinished;
+
   const [currentGuess, setCurrentGuess] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const isFinished = game?.status === 'WON' || game?.status === 'LOST';
-
   const handleKeyPress = useCallback(
     (key: string) => {
-      if (isFinished || isSubmitting) return;
+      if (!canType || active.isSubmitting) return;
 
       if (key === 'BACKSPACE') {
         setCurrentGuess((prev) => prev.slice(0, -1));
@@ -31,7 +40,8 @@ function Home() {
           setFeedback(`O palpite precisa ter ${WORD_LENGTH} letras.`);
           return;
         }
-        submitGuess(currentGuess)
+        active
+          .submitGuess(currentGuess)
           .then(() => setCurrentGuess(''))
           .catch(() => setFeedback('Não foi possível enviar o palpite.'));
         return;
@@ -41,7 +51,7 @@ function Home() {
         setCurrentGuess((prev) => prev + key);
       }
     },
-    [currentGuess, isFinished, isSubmitting, submitGuess],
+    [active, canType, currentGuess],
   );
 
   useEffect(() => {
@@ -60,7 +70,12 @@ function Home() {
     return () => clearTimeout(timeout);
   }, [feedback]);
 
-  if (isLoading) {
+  useEffect(() => {
+    setCurrentGuess('');
+    setFeedback(null);
+  }, [mode]);
+
+  if (daily.isLoading || random.isLoading) {
     return <div className="flex flex-1 items-center justify-center text-slate-400">Carregando...</div>;
   }
 
@@ -70,11 +85,47 @@ function Home() {
         <h1 className="text-3xl font-bold tracking-tight text-slate-100">
           Letra<span className="text-emerald-400">Certa</span>
         </h1>
-        <p className="mt-1 text-sm text-slate-400">Descubra a palavra do dia em até 6 tentativas.</p>
+        <p className="mt-1 text-sm text-slate-400">
+          {mode === 'daily'
+            ? 'Descubra a palavra do dia em até 6 tentativas.'
+            : 'Palavra aleatória: jogue quantas vezes quiser.'}
+        </p>
       </div>
 
-      {(feedback || error) && (
-        <p className="rounded-md bg-slate-800 px-4 py-2 text-sm text-amber-300">{feedback ?? error}</p>
+      <div className="flex gap-1 rounded-lg bg-slate-900 p-1">
+        <button
+          type="button"
+          onClick={() => setMode('daily')}
+          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition-colors ${
+            mode === 'daily' ? 'bg-emerald-500 text-slate-900' : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          Palavra do dia
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('random')}
+          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition-colors ${
+            mode === 'random' ? 'bg-emerald-500 text-slate-900' : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          Palavra aleatória
+        </button>
+      </div>
+
+      {(feedback || active.error) && (
+        <p className="rounded-md bg-slate-800 px-4 py-2 text-sm text-amber-300">{feedback ?? active.error}</p>
+      )}
+
+      {mode === 'random' && !game && (
+        <button
+          type="button"
+          onClick={() => random.startNew().catch(() => {})}
+          disabled={random.isSubmitting}
+          className="rounded-md bg-emerald-500 px-6 py-2 font-semibold text-slate-900 hover:bg-emerald-400 disabled:opacity-60"
+        >
+          Jogar palavra aleatória
+        </button>
       )}
 
       {game && <Board attempts={game.attempts} currentGuess={currentGuess} />}
@@ -88,9 +139,22 @@ function Home() {
         </p>
       )}
 
-      <Keyboard attempts={game?.attempts ?? []} onKeyPress={handleKeyPress} disabled={isFinished || isSubmitting} />
+      {mode === 'random' && isFinished && (
+        <button
+          type="button"
+          onClick={() => random.startNew().catch(() => {})}
+          disabled={random.isSubmitting}
+          className="rounded-md bg-slate-800 px-6 py-2 font-semibold text-slate-100 hover:bg-slate-700 disabled:opacity-60"
+        >
+          Jogar de novo com outra palavra
+        </button>
+      )}
 
-      {isFinished && <StatsPanel />}
+      {game && (
+        <Keyboard attempts={game.attempts} onKeyPress={handleKeyPress} disabled={!canType || active.isSubmitting} />
+      )}
+
+      {mode === 'daily' && isFinished && <StatsPanel />}
     </main>
   );
 }

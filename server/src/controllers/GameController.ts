@@ -33,4 +33,26 @@ export class GameController {
     const state = await gameService.submitGuess(request.currentUser!, guess);
     reply.status(200).send(state);
   }
+
+  async randomCurrent(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const em = getORM().em.fork();
+    const gameService = buildGameService(em);
+    const state = await gameService.getRandomState(request.currentUser!);
+    reply.status(200).send(state);
+  }
+
+  async randomStart(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const em = getORM().em.fork();
+    const gameService = buildGameService(em);
+    const state = await gameService.startRandomGame(request.currentUser!);
+    reply.status(201).send(state);
+  }
+
+  async randomGuess(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const { guess } = guessSchema.parse(request.body);
+    const em = getORM().em.fork();
+    const gameService = buildGameService(em);
+    const state = await gameService.submitRandomGuess(request.currentUser!, guess);
+    reply.status(200).send(state);
+  }
 }

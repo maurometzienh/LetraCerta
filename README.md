@@ -8,6 +8,11 @@ LetraCerta é um jogo de adivinhação de palavras (estilo Wordle/Termo). O joga
 
 O sistema possui cadastro/login de usuários, histórico de partidas, estatísticas (vitórias, sequência de acertos, distribuição de tentativas) e ranking dos jogadores.
 
+Existem dois modos de jogo:
+
+- **Palavra do dia**: uma única palavra sorteada por dia, igual para todos os jogadores (conta para estatísticas e ranking).
+- **Palavra aleatória**: modo livre/treino — a qualquer momento o jogador pode sortear uma nova palavra e jogar quantas vezes quiser. Não afeta a palavra do dia nem entra nas estatísticas/ranking.
+
 ## Stack
 
 | Camada       | Tecnologia                            |
@@ -138,9 +143,12 @@ npm run seed    # roda o seed de palavras novamente (idempotente)
 | POST   | `/api/auth/login`     | Autentica e retorna um JWT                     | não         |
 | GET    | `/api/auth/me`        | Dados do usuário logado                        | sim         |
 | GET    | `/api/games/today`    | Estado da partida do dia do usuário            | sim         |
-| POST   | `/api/games/guess`    | Envia um palpite (`{ "guess": "carta" }`)      | sim         |
-| GET    | `/api/stats/me`       | Estatísticas do usuário (vitórias, streak, distribuição de tentativas) | sim |
-| GET    | `/api/ranking`        | Ranking dos jogadores por vitórias             | não         |
+| POST   | `/api/games/guess`    | Envia um palpite na palavra do dia (`{ "guess": "carta" }`) | sim |
+| GET    | `/api/games/random/current` | Estado da partida aleatória em andamento (ou `null`) | sim   |
+| POST   | `/api/games/random/start`   | Sorteia uma nova palavra e inicia uma partida avulsa | sim   |
+| POST   | `/api/games/random/guess`   | Envia um palpite na partida aleatória atual    | sim         |
+| GET    | `/api/stats/me`       | Estatísticas do usuário (vitórias, streak, distribuição de tentativas) — apenas modo palavra do dia | sim |
+| GET    | `/api/ranking`        | Ranking dos jogadores por vitórias — apenas modo palavra do dia | não |
 
 ## Deploy
 
