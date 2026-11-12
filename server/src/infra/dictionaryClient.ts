@@ -18,10 +18,14 @@ export async function checkWordExists(word: string): Promise<boolean | null> {
     });
 
     if (response.status === 404) return false;
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn(`[dictionaryClient] resposta inesperada (${response.status}) para "${word}"`);
+      return null;
+    }
 
     return true;
-  } catch {
+  } catch (err) {
+    console.warn(`[dictionaryClient] falha ao consultar a API para "${word}":`, err);
     return null;
   } finally {
     clearTimeout(timeout);
