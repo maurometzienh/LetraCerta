@@ -1,12 +1,13 @@
-const DICTIONARY_API_URL = 'https://api.dictionaryapi.dev/api/v2/entries/pt';
+const DICTIONARY_API_URL = 'https://api.dicionario-aberto.net/word';
 const TIMEOUT_MS = 3000;
 
 /**
- * Consulta a Free Dictionary API para saber se uma palavra existe no português.
- * Retorna `true`/`false` quando a API responde normalmente, e `null` quando
- * não foi possível obter uma resposta confiável (timeout, API fora do ar,
- * erro inesperado) — nesses casos o chamador deve liberar o palpite em vez
- * de bloquear o jogo por causa de uma falha de terceiros.
+ * Consulta a API do Dicionário Aberto (dicionario-aberto.net) para saber se
+ * uma palavra existe no português. Retorna `true`/`false` quando a API
+ * responde normalmente, e `null` quando não foi possível obter uma resposta
+ * confiável (timeout, API fora do ar, erro inesperado) — nesses casos o
+ * chamador deve liberar o palpite em vez de bloquear o jogo por causa de
+ * uma falha de terceiros.
  */
 export async function checkWordExists(word: string): Promise<boolean | null> {
   const controller = new AbortController();
@@ -17,13 +18,19 @@ export async function checkWordExists(word: string): Promise<boolean | null> {
       signal: controller.signal,
     });
 
-    if (response.status === 404) return false;
     if (!response.ok) {
       console.warn(`[dictionaryClient] resposta inesperada (${response.status}) para "${word}"`);
       return null;
     }
 
-    return true;
+    const entries = await response.json();
+    if (!Array.isArray(entries)) {
+      console.warn(`[dictionaryClient] formato de resposta inesperado para "${word}"`);
+      return null;
+    }
+
+    // A API retorna uma lista de verbetes: vazia quando a palavra não existe.
+    return entries.length > 0;
   } catch (err) {
     console.warn(`[dictionaryClient] falha ao consultar a API para "${word}":`, err);
     return null;

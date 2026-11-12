@@ -28,7 +28,7 @@ Outras funcionalidades:
 | Back-end     | Node.js + TypeScript + Fastify         |
 | ORM          | MikroORM                               |
 | Banco de dados | PostgreSQL                           |
-| Integração externa | [Free Dictionary API](https://dictionaryapi.dev/) (validação de palavras em português, sem necessidade de chave) |
+| Integração externa | [Dicionário Aberto](https://dicionario-aberto.net/) (validação de palavras em português, sem necessidade de chave) |
 
 ## Arquitetura
 
