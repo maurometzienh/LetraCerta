@@ -44,7 +44,7 @@ function Home() {
         active
           .submitGuess(currentGuess)
           .then(() => setCurrentGuess(''))
-          .catch(() => setFeedback('Não foi possível enviar o palpite.'));
+          .catch(() => {});
         return;
       }
 
