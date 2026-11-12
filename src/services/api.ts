@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3333/api';
 const TOKEN_STORAGE_KEY = 'letracerta:token';
+const USER_STORAGE_KEY = 'letracerta:user';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -54,6 +55,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // Token expirado/inválido numa chamada autenticada: desloga e manda pro login
+    // em vez de deixar a tela num estado inconsistente.
+    if (auth && response.status === 401 && !window.location.pathname.startsWith('/login')) {
+      clearToken();
+      localStorage.removeItem(USER_STORAGE_KEY);
+      window.location.href = '/login';
+    }
+
     const message = data?.message ?? 'Erro ao comunicar com o servidor.';
     throw new ApiError(message, response.status);
   }

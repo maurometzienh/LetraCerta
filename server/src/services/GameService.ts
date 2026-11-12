@@ -2,6 +2,7 @@ import { GameRepository } from '../repositories/GameRepository.js';
 import { AttemptRepository } from '../repositories/AttemptRepository.js';
 import { WordRepository } from '../repositories/WordRepository.js';
 import { DailyWordService } from './DailyWordService.js';
+import { DictionaryService } from './DictionaryService.js';
 import { evaluateGuess, LetterStatus } from './WordFeedbackService.js';
 import { Game, GameMode, GameStatus } from '../domain/entities/Game.js';
 import { User } from '../domain/entities/User.js';
@@ -27,6 +28,7 @@ export class GameService {
     private readonly attemptRepository: AttemptRepository,
     private readonly wordRepository: WordRepository,
     private readonly dailyWordService: DailyWordService,
+    private readonly dictionaryService: DictionaryService,
   ) {}
 
   async getTodayState(user: User): Promise<GameStateDTO> {
@@ -54,6 +56,7 @@ export class GameService {
       await this.gameRepository.flush();
     }
 
+    await this.assertRealWord(guess, dailyWord.word.text);
     return this.processGuess(game, guess);
   }
 
@@ -84,6 +87,18 @@ export class GameService {
       throw new AppError('Nenhuma partida aleatória em andamento. Inicie uma nova.', 404);
     }
 
+    await this.assertRealWord(guess, game.word!.text);
+    return this.processGuess(game, guess);
+  }
+
+  /**
+   * Avalia um palpite para uma partida já carregada (com `attempts` e `word`
+   * populados). Usado pelo módulo de duelo, que gerencia suas próprias regras
+   * de busca/validação da partida mas reaproveita a avaliação do palpite.
+   */
+  async submitGuessForGame(game: Game, rawGuess: string): Promise<GameStateDTO> {
+    const guess = this.normalizeGuess(rawGuess);
+    await this.assertRealWord(guess, game.word!.text);
     return this.processGuess(game, guess);
   }
 
@@ -93,6 +108,20 @@ export class GameService {
       throw new AppError(`O palpite deve ter ${WORD_LENGTH} letras.`, 422);
     }
     return guess;
+  }
+
+  /**
+   * Garante que o palpite é uma palavra real, consultando a API de dicionário.
+   * Nunca bloqueia a resposta certa, e nunca bloqueia o jogo por causa de uma
+   * falha da API externa (nesse caso `isValidWord` retorna `null`).
+   */
+  private async assertRealWord(guess: string, secret: string): Promise<void> {
+    if (guess === secret) return;
+
+    const isValid = await this.dictionaryService.isValidWord(guess);
+    if (isValid === false) {
+      throw new AppError('Essa palavra não existe no dicionário.', 422);
+    }
   }
 
   private async processGuess(game: Game, guess: string): Promise<GameStateDTO> {
@@ -125,7 +154,7 @@ export class GameService {
     return this.toStateDTO(refreshedGame!);
   }
 
-  private toStateDTO(game: Game): GameStateDTO {
+  toStateDTO(game: Game): GameStateDTO {
     const attempts = game.attempts
       .getItems()
       .sort((a, b) => a.attemptNumber - b.attemptNumber)

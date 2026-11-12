@@ -3,6 +3,7 @@ import { Game, GameMode, GameStatus } from '../domain/entities/Game.js';
 import { User } from '../domain/entities/User.js';
 import { DailyWord } from '../domain/entities/DailyWord.js';
 import { Word } from '../domain/entities/Word.js';
+import { Duel } from '../domain/entities/Duel.js';
 
 export class GameRepository {
   constructor(private readonly em: EntityManager) {}
@@ -42,6 +43,16 @@ export class GameRepository {
     const game = this.em.create(Game, { user, mode: GameMode.RANDOM, word });
     this.em.persist(game);
     return game;
+  }
+
+  createDuel(user: User, duel: Duel): Game {
+    const game = this.em.create(Game, { user, mode: GameMode.DUEL, duel, word: duel.word });
+    this.em.persist(game);
+    return game;
+  }
+
+  findByDuelAndUser(duel: Duel, user: User): Promise<Game | null> {
+    return this.em.findOne(Game, { duel, user }, { populate: ['attempts', 'word'] });
   }
 
   findFinishedByUser(user: User): Promise<Game[]> {

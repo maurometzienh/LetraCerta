@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Ranking } from './pages/Ranking';
+import { Friends } from './pages/Friends';
+import Duel from './pages/Duel';
 
 function App() {
   return (
@@ -25,6 +27,22 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
             <Route path="/ranking" element={<Ranking />} />
+            <Route
+              path="/amigos"
+              element={
+                <ProtectedRoute>
+                  <Friends />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/duelo/:id"
+              element={
+                <ProtectedRoute>
+                  <Duel />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </AuthProvider>

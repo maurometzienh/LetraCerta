@@ -2,6 +2,7 @@ import { Collection, Entity, Enum, ManyToOne, type Opt, OneToMany, PrimaryKey, P
 import { User } from './User.js';
 import { DailyWord } from './DailyWord.js';
 import { Word } from './Word.js';
+import { Duel } from './Duel.js';
 import { Attempt } from './Attempt.js';
 
 export enum GameStatus {
@@ -13,6 +14,7 @@ export enum GameStatus {
 export enum GameMode {
   DAILY = 'DAILY',
   RANDOM = 'RANDOM',
+  DUEL = 'DUEL',
 }
 
 @Entity({ tableName: 'games' })
@@ -31,7 +33,11 @@ export class Game {
   @ManyToOne(() => DailyWord, { nullable: true })
   dailyWord?: DailyWord;
 
-  /** Palavra secreta desta partida (preenchida em ambos os modos). */
+  /** Preenchido apenas para partidas do modo DUEL. */
+  @ManyToOne(() => Duel, { nullable: true })
+  duel?: Duel;
+
+  /** Palavra secreta desta partida (preenchida em todos os modos). */
   @ManyToOne(() => Word, { nullable: true })
   word?: Word;
 

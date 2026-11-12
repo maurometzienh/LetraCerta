@@ -6,16 +6,19 @@ import { AttemptRepository } from '../repositories/AttemptRepository.js';
 import { WordRepository } from '../repositories/WordRepository.js';
 import { DailyWordRepository } from '../repositories/DailyWordRepository.js';
 import { DailyWordService } from '../services/DailyWordService.js';
+import { DictionaryService } from '../services/DictionaryService.js';
+import { DictionaryCacheRepository } from '../repositories/DictionaryCacheRepository.js';
 import { getORM } from '../infra/orm.js';
 import { guessSchema } from '../dtos/gameDtos.js';
 
-function buildGameService(em: EntityManager) {
+export function buildGameService(em: EntityManager) {
   const wordRepository = new WordRepository(em);
   const dailyWordRepository = new DailyWordRepository(em);
   const dailyWordService = new DailyWordService(wordRepository, dailyWordRepository);
   const gameRepository = new GameRepository(em);
   const attemptRepository = new AttemptRepository(em);
-  return new GameService(gameRepository, attemptRepository, wordRepository, dailyWordService);
+  const dictionaryService = new DictionaryService(new DictionaryCacheRepository(em));
+  return new GameService(gameRepository, attemptRepository, wordRepository, dailyWordService, dictionaryService);
 }
 
 export class GameController {

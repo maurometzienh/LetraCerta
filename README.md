@@ -8,10 +8,17 @@ LetraCerta é um jogo de adivinhação de palavras (estilo Wordle/Termo). O joga
 
 O sistema possui cadastro/login de usuários, histórico de partidas, estatísticas (vitórias, sequência de acertos, distribuição de tentativas) e ranking dos jogadores.
 
-Existem dois modos de jogo:
+Existem três modos de jogo:
 
 - **Palavra do dia**: uma única palavra sorteada por dia, igual para todos os jogadores (conta para estatísticas e ranking).
 - **Palavra aleatória**: modo livre/treino — a qualquer momento o jogador pode sortear uma nova palavra e jogar quantas vezes quiser. Não afeta a palavra do dia nem entra nas estatísticas/ranking.
+- **Duelo**: desafie um amigo pra uma corrida 1x1 com a mesma palavra secreta. Cada um vê o próprio tabuleiro normalmente, e o progresso do adversário num painel ao lado — só os quadradinhos de cor (🟩🟨⬜) de cada tentativa dele, nunca as palavras que ele digitou. Quem acerta primeiro vence a partida.
+
+Outras funcionalidades:
+
+- **Lista de amigos**: busca por nome de usuário, pedidos de amizade (enviar/aceitar/recusar).
+- **Validação de palavras reais**: os palpites são conferidos contra uma API de dicionário externa — não dá pra "forçar" o jogo digitando qualquer sequência de letras.
+- **Compartilhar resultado**: depois de uma partida (palavra do dia ou aleatória), copia pro clipboard um resumo em emojis estilo Wordle.
 
 ## Stack
 
@@ -21,6 +28,7 @@ Existem dois modos de jogo:
 | Back-end     | Node.js + TypeScript + Fastify         |
 | ORM          | MikroORM                               |
 | Banco de dados | PostgreSQL                           |
+| Integração externa | [Free Dictionary API](https://dictionaryapi.dev/) (validação de palavras em português, sem necessidade de chave) |
 
 ## Arquitetura
 
@@ -38,9 +46,9 @@ O projeto é dividido em dois workspaces independentes:
 
 /server           # Back-end (Node + TypeScript + Fastify + MikroORM)
   src/
-    domain/entities/  # Entidades MikroORM (User, Word, DailyWord, Game, Attempt)
+    domain/entities/  # Entidades MikroORM (User, Word, DailyWord, Game, Attempt, Friendship, Duel, DictionaryCache)
     repositories/     # Camada de acesso a dados (uma classe por entidade)
-    services/         # Regras de negócio (Auth, DailyWord, Game, WordFeedback, Stats, Ranking)
+    services/         # Regras de negócio (Auth, DailyWord, Game, WordFeedback, Stats, Ranking, Dictionary, Friendship, Duel)
     controllers/       # Camada de apresentação: recebe a request e delega ao service
     routes/            # Definição das rotas Fastify e amarração dos controllers
     middlewares/        # Autenticação JWT e tratamento centralizado de erros
@@ -149,6 +157,20 @@ npm run seed    # roda o seed de palavras novamente (idempotente)
 | POST   | `/api/games/random/guess`   | Envia um palpite na partida aleatória atual    | sim         |
 | GET    | `/api/stats/me`       | Estatísticas do usuário (vitórias, streak, distribuição de tentativas) — apenas modo palavra do dia | sim |
 | GET    | `/api/ranking`        | Ranking dos jogadores por vitórias — apenas modo palavra do dia | não |
+| GET    | `/api/friends`        | Lista de amigos                                | sim         |
+| GET    | `/api/friends/requests` | Pedidos de amizade pendentes recebidos       | sim         |
+| POST   | `/api/friends/requests` | Envia um pedido de amizade (`{ "username": "..." }`) | sim   |
+| POST   | `/api/friends/requests/:id/respond` | Aceita/recusa um pedido (`{ "accept": true }`) | sim |
+| POST   | `/api/duels/challenge` | Desafia um amigo pra um duelo (`{ "username": "..." }`) | sim    |
+| GET    | `/api/duels/pending`  | Convites de duelo pendentes recebidos          | sim         |
+| GET    | `/api/duels/active`   | Id do duelo em andamento do usuário, se houver | sim         |
+| POST   | `/api/duels/:id/respond` | Aceita/recusa um convite de duelo (`{ "accept": true }`) | sim |
+| GET    | `/api/duels/:id`      | Estado do duelo: meu jogo completo + progresso do adversário (só emojis) | sim |
+| POST   | `/api/duels/:id/guess` | Envia um palpite no duelo                     | sim         |
+
+## Modos de jogo e multiplayer
+
+O duelo é implementado por polling: o front consulta `GET /api/duels/:id` a cada ~3 segundos enquanto a partida está em andamento, pra atualizar o progresso do adversário sem precisar de WebSocket. Cada jogador tem sua própria `Game` (reaproveitando toda a lógica de validação/avaliação de palpite do modo normal), vinculada ao mesmo `Duel` e à mesma palavra secreta. Quando alguém acerta, a partida do outro jogador é automaticamente encerrada (derrota por "corrida perdida"), e se os dois esgotarem as tentativas sem acertar, o duelo termina em empate.
 
 ## Deploy
 

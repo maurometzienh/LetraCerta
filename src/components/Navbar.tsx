@@ -24,6 +24,9 @@ export function Navbar() {
         </Link>
         {user ? (
           <>
+            <Link to="/amigos" className="text-slate-300 hover:text-white">
+              Amigos
+            </Link>
             <span className="text-slate-500">Olá, {user.username}</span>
             <button
               type="button"

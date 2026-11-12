@@ -4,6 +4,8 @@ import { authRoutes } from './routes/authRoutes.js';
 import { gameRoutes } from './routes/gameRoutes.js';
 import { statsRoutes } from './routes/statsRoutes.js';
 import { rankingRoutes } from './routes/rankingRoutes.js';
+import { friendshipRoutes } from './routes/friendshipRoutes.js';
+import { duelRoutes } from './routes/duelRoutes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 export function buildApp(): FastifyInstance {
@@ -21,6 +23,8 @@ export function buildApp(): FastifyInstance {
   app.register(gameRoutes, { prefix: '/api' });
   app.register(statsRoutes, { prefix: '/api' });
   app.register(rankingRoutes, { prefix: '/api' });
+  app.register(friendshipRoutes, { prefix: '/api' });
+  app.register(duelRoutes, { prefix: '/api' });
 
   return app;
 }

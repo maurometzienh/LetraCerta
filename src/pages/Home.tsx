@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Board } from '../components/Board';
 import { Keyboard } from '../components/Keyboard';
 import { StatsPanel } from '../components/StatsPanel';
+import { ShareResultButton } from '../components/ShareResultButton';
 import { useGame } from '../hooks/useGame';
 import { useRandomGame } from '../hooks/useRandomGame';
 import { WORD_LENGTH } from '../utils/constants';
@@ -137,6 +138,13 @@ function Home() {
             <span className="uppercase text-emerald-400">{game.secretWord}</span>
           )}
         </p>
+      )}
+
+      {isFinished && game && (
+        <ShareResultButton
+          game={game}
+          modeLabel={mode === 'daily' ? 'Palavra do dia' : 'Palavra aleatória'}
+        />
       )}
 
       {mode === 'random' && isFinished && (
