@@ -78,7 +78,9 @@ function Duel() {
   return (
     <main className="flex flex-1 flex-col items-center gap-6 px-4 py-8">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-100">Duelo contra {duel.opponentUsername}</h1>
+        <h1 className="break-words text-xl font-bold text-slate-100 sm:text-2xl">
+          Duelo contra {duel.opponentUsername}
+        </h1>
         {duel.status === 'PENDING' && (
           <p className="mt-1 text-sm text-amber-300">
             Aguardando {duel.opponentUsername} aceitar o desafio...

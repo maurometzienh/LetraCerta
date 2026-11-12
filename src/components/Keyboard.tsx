@@ -37,15 +37,15 @@ export function Keyboard({ attempts, onKeyPress, disabled }: KeyboardProps) {
   const statusMap = buildLetterStatusMap(attempts);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1 sm:gap-2">
       {ROWS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-1.5">
+        <div key={rowIndex} className="flex gap-1 sm:gap-1.5">
           {rowIndex === 2 && (
             <button
               type="button"
               disabled={disabled}
               onClick={() => onKeyPress('ENTER')}
-              className="rounded-md bg-slate-600 px-3 text-xs font-semibold text-slate-100 hover:bg-slate-500 disabled:opacity-50"
+              className="rounded-md bg-slate-600 px-1.5 text-[10px] font-semibold text-slate-100 hover:bg-slate-500 disabled:opacity-50 sm:px-3 sm:text-xs"
             >
               Enviar
             </button>
@@ -56,7 +56,7 @@ export function Keyboard({ attempts, onKeyPress, disabled }: KeyboardProps) {
               type="button"
               disabled={disabled}
               onClick={() => onKeyPress(key)}
-              className={`h-11 min-w-9 rounded-md px-2 text-sm font-semibold uppercase disabled:opacity-50 ${
+              className={`h-10 min-w-7 rounded-md px-1 text-xs font-semibold uppercase disabled:opacity-50 sm:h-11 sm:min-w-9 sm:px-2 sm:text-sm ${
                 STATUS_CLASSES[statusMap[key] ?? 'unused']
               }`}
             >
@@ -68,7 +68,7 @@ export function Keyboard({ attempts, onKeyPress, disabled }: KeyboardProps) {
               type="button"
               disabled={disabled}
               onClick={() => onKeyPress('BACKSPACE')}
-              className="rounded-md bg-slate-600 px-3 text-xs font-semibold text-slate-100 hover:bg-slate-500 disabled:opacity-50"
+              className="rounded-md bg-slate-600 px-1.5 text-[10px] font-semibold text-slate-100 hover:bg-slate-500 disabled:opacity-50 sm:px-3 sm:text-xs"
             >
               ⌫
             </button>

@@ -66,7 +66,7 @@ export function Friends() {
       <h1 className="mb-6 text-2xl font-bold text-slate-100">Amigos</h1>
 
       {duelLobby.activeDuelId && (
-        <div className="mb-6 flex items-center justify-between rounded-md border border-emerald-700 bg-emerald-950 px-4 py-3">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-700 bg-emerald-950 px-4 py-3">
           <span className="text-sm text-emerald-300">Você tem um duelo em andamento!</span>
           <button
             type="button"
@@ -85,9 +85,9 @@ export function Friends() {
             {duelLobby.pending.map((duel) => (
               <li
                 key={duel.id}
-                className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
               >
-                <span className="text-slate-100">{duel.opponentUsername} te desafiou!</span>
+                <span className="truncate text-slate-100">{duel.opponentUsername} te desafiou!</span>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -110,7 +110,7 @@ export function Friends() {
         </section>
       )}
 
-      <form onSubmit={handleSubmit} className="mb-8 flex gap-2">
+      <form onSubmit={handleSubmit} className="mb-8 flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           required
@@ -143,9 +143,9 @@ export function Friends() {
                 {pending.map((request) => (
                   <li
                     key={request.requestId}
-                    className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
                   >
-                    <span className="text-slate-100">{request.from.username}</span>
+                    <span className="truncate text-slate-100">{request.from.username}</span>
                     <div className="flex gap-2">
                       <button
                         type="button"
@@ -177,9 +177,9 @@ export function Friends() {
                 {friends.map((friend) => (
                   <li
                     key={friend.id}
-                    className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-900 px-4 py-3"
                   >
-                    <span className="text-slate-100">{friend.username}</span>
+                    <span className="truncate text-slate-100">{friend.username}</span>
                     <button
                       type="button"
                       onClick={() => handleChallenge(friend.username)}

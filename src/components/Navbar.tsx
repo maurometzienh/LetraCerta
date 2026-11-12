@@ -11,11 +11,11 @@ export function Navbar() {
   }
 
   return (
-    <nav className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-      <Link to="/" className="text-xl font-bold tracking-tight text-emerald-400">
+    <nav className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-slate-800 px-4 py-3 sm:px-6 sm:py-4">
+      <Link to="/" className="text-lg font-bold tracking-tight text-emerald-400 sm:text-xl">
         LetraCerta
       </Link>
-      <div className="flex items-center gap-4 text-sm">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm sm:gap-x-4">
         <Link to="/" className="text-slate-300 hover:text-white">
           Jogar
         </Link>
@@ -27,7 +27,9 @@ export function Navbar() {
             <Link to="/amigos" className="text-slate-300 hover:text-white">
               Amigos
             </Link>
-            <span className="text-slate-500">Olá, {user.username}</span>
+            <span className="hidden max-w-[140px] truncate text-slate-500 sm:inline">
+              Olá, {user.username}
+            </span>
             <button
               type="button"
               onClick={handleLogout}

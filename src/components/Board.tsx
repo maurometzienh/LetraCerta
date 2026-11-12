@@ -23,14 +23,14 @@ export function Board({ attempts, currentGuess }: BoardProps) {
         : new Array(WORD_LENGTH).fill(' ');
 
     return (
-      <div key={rowIndex} className="grid grid-cols-5 gap-2">
+      <div key={rowIndex} className="grid grid-cols-5 gap-1.5 sm:gap-2">
         {letters.map((letter, colIndex) => {
           const status = attempt?.result[colIndex];
           const filled = letter.trim() !== '';
           return (
             <div
               key={colIndex}
-              className={`flex h-14 w-14 items-center justify-center rounded-md border-2 text-2xl font-bold uppercase transition-colors ${
+              className={`flex h-12 w-12 items-center justify-center rounded-md border-2 text-xl font-bold uppercase transition-colors sm:h-14 sm:w-14 sm:text-2xl ${
                 status
                   ? STATUS_CLASSES[status]
                   : filled
@@ -46,5 +46,5 @@ export function Board({ attempts, currentGuess }: BoardProps) {
     );
   });
 
-  return <div className="flex flex-col gap-2">{rows}</div>;
+  return <div className="flex flex-col gap-1.5 sm:gap-2">{rows}</div>;
 }
